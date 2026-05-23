@@ -199,9 +199,9 @@ export class CreateLeonardoImage implements INodeType {
               "Submit the generation and immediately output the generation ID without waiting. Pair with an n8n Webhook node registered on your Leonardo Production API key to receive the finished image. Use this when generations are slow and risk timing out.",
           },
         ],
-        default: 'async',
+        default: 'wait',
         description:
-          'Whether to wait for the image (polling) or return immediately with the generation ID for webhook-based completion. Defaults to async to avoid timeouts on slow generations.',
+          'Whether to wait for the image (polling) or return immediately with the generation ID for webhook-based completion. Use async to avoid timeouts on slow generations.',
         displayOptions: {
           show: {
             operation: ['createLeonardoImage'],
@@ -1575,7 +1575,7 @@ export class CreateLeonardoImage implements INodeType {
         // Leonardo delivers the finished image to the webhook callback URL configured
         // on the Production API key (account-level, not per request), so downstream
         // completion is handled by an n8n Webhook trigger node.
-        const responseMode = this.getNodeParameter('responseMode', i, 'async') as string;
+        const responseMode = this.getNodeParameter('responseMode', i, 'wait') as string;
         if (responseMode === 'async') {
           returnData.push({
             json: {

@@ -20,10 +20,7 @@ export function createLeonardoMockFunction(
   nodeParameters: INodeParameters,
   workflow: any = {}
 ): IExecuteFunctions {
-  // These helpers exercise the synchronous polling flow. The node now defaults
-  // responseMode to 'async', so default it to 'wait' here unless a test opts in.
-  const params: INodeParameters = { responseMode: 'wait', ...nodeParameters };
-  const baseMock = createMockExecuteFunction(params, workflow);
+  const baseMock = createMockExecuteFunction(nodeParameters, workflow);
 
   // Override with Leonardo-specific helpers.request mocking
   baseMock.helpers.request = jest.fn().mockImplementation(async (options: any) => {
