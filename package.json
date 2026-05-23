@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-selfhosthub",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Collection of n8n nodes for self-hosted AI services, including Leonardo.ai integration for AI image and content generation capabilities.",
   "keywords": [
     "n8n",
