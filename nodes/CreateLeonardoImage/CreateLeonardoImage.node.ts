@@ -182,6 +182,46 @@ export class CreateLeonardoImage implements INodeType {
         },
       },
       {
+        displayName: 'Response Mode',
+        name: 'responseMode',
+        type: 'options',
+        options: [
+          {
+            name: 'Wait for Image (Poll)',
+            value: 'wait',
+            description:
+              'Submit the generation and poll until the image is ready before continuing. Best for fast generations.',
+          },
+          {
+            name: 'Submit Only (Async / Webhook)',
+            value: 'async',
+            description:
+              "Submit the generation and immediately output the generation ID without waiting. Pair with an n8n Webhook node registered on your Leonardo Production API key to receive the finished image. Use this when generations are slow and risk timing out.",
+          },
+        ],
+        default: 'async',
+        description:
+          'Whether to wait for the image (polling) or return immediately with the generation ID for webhook-based completion. Defaults to async to avoid timeouts on slow generations.',
+        displayOptions: {
+          show: {
+            operation: ['createLeonardoImage'],
+          },
+        },
+      },
+      {
+        displayName:
+          'Async mode returns only the generation ID. Leonardo delivers the finished image to the webhook callback URL configured on your <b>Production API key</b> (Leonardo dashboard) — it cannot be set per request. Capture it with an n8n Webhook trigger node.',
+        name: 'asyncNotice',
+        type: 'notice',
+        default: '',
+        displayOptions: {
+          show: {
+            operation: ['createLeonardoImage'],
+            responseMode: ['async'],
+          },
+        },
+      },
+      {
         displayName: 'Advanced Options',
         name: 'advancedOptions',
         type: 'boolean',
@@ -1530,6 +1570,25 @@ export class CreateLeonardoImage implements INodeType {
         }
 
         const generationId = parsedResponse.sdGenerationJob.generationId;
+
+        // Async / webhook mode: return the generation ID immediately without polling.
+        // Leonardo delivers the finished image to the webhook callback URL configured
+        // on the Production API key (account-level, not per request), so downstream
+        // completion is handled by an n8n Webhook trigger node.
+        const responseMode = this.getNodeParameter('responseMode', i, 'async') as string;
+        if (responseMode === 'async') {
+          returnData.push({
+            json: {
+              success: true,
+              generationId,
+              status: 'PENDING',
+              apiCreditCost: parsedResponse.sdGenerationJob.apiCreditCost,
+              request: body,
+              rawResponse: JSON.parse(JSON.stringify(parsedResponse)),
+            },
+          });
+          continue;
+        }
 
         // Polling for image generation completion
         let generationStatus;

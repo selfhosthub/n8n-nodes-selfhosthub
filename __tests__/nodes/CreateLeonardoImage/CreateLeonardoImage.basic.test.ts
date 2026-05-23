@@ -83,6 +83,44 @@ describe('CreateLeonardoImage - Basic Tests', () => {
       expect(json.rawResponse).toHaveProperty('generations_by_pk');
     });
 
+    it('should return the generation ID immediately in async mode without polling', async () => {
+      const parameters = {
+        operation: 'createLeonardoImage',
+        responseMode: 'async',
+        prompt: 'Async webhook test',
+        modelId: 'b820ea11-02bf-4652-97ae-9ac0cc00593d',
+        width: 512,
+        height: 512,
+        numImages: 1,
+      };
+
+      mockExecuteFunction = createLeonardoMockFunction(parameters);
+
+      const mockRequest = jest.fn().mockResolvedValueOnce(JSON.stringify({
+        sdGenerationJob: { generationId: 'mock-generation-id', apiCreditCost: 8 },
+      }));
+      mockExecuteFunction.helpers = { request: mockRequest } as any;
+
+      jest.spyOn(mockExecuteFunction, 'getCredentials').mockResolvedValue({
+        apiKey: 'mock-api-key',
+      });
+
+      const result = await createLeonardoImage.execute!.call(mockExecuteFunction);
+
+      // Only the POST should have been made — no status polling
+      expect(mockRequest).toHaveBeenCalledTimes(1);
+      expect(mockRequest.mock.calls[0][0].method).toBe('POST');
+
+      const json = result[0][0].json as any;
+      expect(json).toHaveProperty('success', true);
+      expect(json).toHaveProperty('generationId', 'mock-generation-id');
+      expect(json).toHaveProperty('status', 'PENDING');
+      expect(json).toHaveProperty('apiCreditCost', 8);
+      expect(json).toHaveProperty('request');
+      expect(json.request).toHaveProperty('prompt', 'Async webhook test');
+      expect(json).not.toHaveProperty('images');
+    });
+
     it('should handle errors from the Leonardo API', async () => {
       const parameters = {
         operation: 'createLeonardoImage',
