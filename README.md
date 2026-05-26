@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/kickin6/n8n-nodes-selfhosthub/graph/badge.svg)](https://codecov.io/gh/kickin6/n8n-nodes-selfhosthub)
+[![codecov](https://codecov.io/gh/selfhosthub/n8n-nodes-selfhosthub/graph/badge.svg)](https://codecov.io/gh/selfhosthub/n8n-nodes-selfhosthub)
 
 # n8n-nodes-selfhosthub
 
